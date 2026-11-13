@@ -23,7 +23,7 @@ function main(): void {
   const cancellation = app.service.cancel(booking.id);
   console.log(
     `cancelled ${booking.id}, refund ${cancellation.refundCents} cents, ` +
-      `refund message ${cancellation.refundMessageId}`,
+    `refund message ${cancellation.refundMessageId}`,
   );
   console.log(`the cancel call itself returned: booking is ${cancellation.booking.status}`);
 
@@ -32,8 +32,15 @@ function main(): void {
 
   console.log(
     '\nthe refund message is in the log and in the dead-letter list. ' +
-      'Milestone 3 asks what you do with it.',
+    'Milestone 3 asks what you do with it.',
   );
+
+  const failed = app.bus.deadLetters()[0];
+  console.log(`\nredelivering ${failed.message.id} to ${failed.subscriberName}`);
+  app.bus.redeliver(failed.message.id);
+
+  printRefundState(app, 'after the redelivery');
+  printMessageLog(app);
 }
 
 main();
